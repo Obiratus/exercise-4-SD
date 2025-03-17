@@ -1,6 +1,8 @@
 # Exercise 4: Operating on Linked Data
 The git repository can be found here: https://github.com/Obiratus/exercise-4-SD
 
+**Info**: The markup file in the repo is more readable.
+
 ## Task 1
 ### Task 1.1
 WebID: https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card#me
@@ -123,5 +125,5 @@ This requests are made in the given order:
    [https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card](https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card)
 ---
 
-## Task 1
+## Task 2
 See [Pod.java](../src/env/solid/Pod.java)
