@@ -14,16 +14,17 @@ Change to the query directory:
 ```
 $ cd task1_1_queries
 ```
-Test to check running queries from a file
+**Just for Simon**: Test to check running queries from a file
 ```
 $ comunica-sparql https://fragments.dbpedia.org/2016-04/en -f 0_test.sparql
 ```
 
 #### 1. Query WebIds
-With file, for development and debug:
+With file [1_allPeopleWebIds.sparql](../task1_2_queries/1_allPeopleWebIds.sparql):
 ```
 $ comunica-sparql https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card#me -f 1_allPeopleWebIds.sparql -l debug
 ```
+
 Directly:
 ```
 $ comunica-sparql https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card#me "SELECT ?knownPersonId WHERE {?s <http://xmlns.com/foaf/0.1/knows> ?knownPersonId}"
@@ -43,7 +44,7 @@ WHERE {
 A single HTTP GET request is executed to fetch Simon's profile document from: https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card
 
 #### 2. Query Names
-With file, for development and debug:
+With file [2_allPeopleNames.sparql](../task1_2_queries/2_allPeopleNames.sparql):
 ```
 $ comunica-sparql-link-traversal -f 2_allPeopleNames.sparql -l debug
 ```
