@@ -1,0 +1,7 @@
+# Subjekt, Prädikat, Objekt!
+
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+SELECT DISTINCT ?name WHERE {
+    <https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card#me> foaf:knows* ?person.
+    ?person foaf:name ?name.
+}

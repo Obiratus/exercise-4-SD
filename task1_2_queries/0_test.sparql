@@ -1,0 +1,3 @@
+# Subjekt, Prädikat, Objekt!
+
+SELECT * WHERE { ?s ?p ?o } LIMIT 100

@@ -1,0 +1,6 @@
+# Subjekt, Prädikat, Objekt!
+
+SELECT ?knownPersonId
+WHERE {
+    <https://wiser-solid-xi.interactions.ics.unisg.ch/simon/profile/card#me> <http://xmlns.com/foaf/0.1/knows> ?knownPersonId
+}
