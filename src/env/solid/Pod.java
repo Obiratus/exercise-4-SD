@@ -4,15 +4,20 @@ import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 /**
  * A CArtAgO artifact that agent can use to interact with LDP containers in a Solid pod.
  */
 public class Pod extends Artifact {
 
-    private String podURL; // the location of the Solid pod 
+    private String podURL; // the location of the Solid pod
 
   /**
-   * Method called by CArtAgO to initialize the artifact. 
+   * Method called by CArtAgO to initialize the artifact.
    *
    * @param podURL The location of a Solid pod
    */
@@ -21,32 +26,143 @@ public class Pod extends Artifact {
         log("Pod artifact initialized for: " + this.podURL);
     }
 
+
+
+    /*
+        Task 2.1 Creating an LDP container
+        Implement the method createContainer() of the Java class Pod that enables agents to create an LDP container in your pod. You can check whether a container is already present in order not to create it again, which would cause additional containers that you do not need to be created.
+
+        TIP: Creating containers based on the Solid Community Server documentation
+        TIP: You should create a container as an empty resource, whose URL ends with "/".
+        TIP: You can optionally check that your container is not present before creating the container.
+     */
+
   /**
    * CArtAgO operation for creating a Linked Data Platform container in the Solid pod
    *
    * @param containerName The name of the container to be created
-   * 
+   *
    */
     @OPERATION
     public void createContainer(String containerName) {
-        log("1. Implement the method createContainer()");
+        // log("1. Implement the method createContainer()");
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        if (!containerName.endsWith("/")) {
+            containerName += "/";
+        }
+
+        if (!podURL.endsWith("/")) {
+            podURL += "/";
+        }
+
+        String containerURL = podURL + containerName;
+
+        // Check if container exists
+        try {
+            HttpRequest headRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(containerURL))
+                    .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpResponse<Void> headResponse = client.send(headRequest, HttpResponse.BodyHandlers.discarding()); // No need to read the body
+
+            if (headResponse.statusCode() == 200) {
+                log("The container already exists: " + containerURL);
+                return; // Exit early if the container exists
+            }
+
+        } catch (Exception e) {
+            log("Container not found or error during HEAD request. Proceeding to create container: " + containerName);
+        }
+
+        // If container does not exist yet, it's time to create it
+        try {
+            HttpRequest putRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(containerURL)) // Reuse containerURL
+                    .PUT(HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpResponse<String> putResponse = client.send(putRequest, HttpResponse.BodyHandlers.ofString());
+
+            // Response checking
+            int statusCode = putResponse.statusCode();
+            if (statusCode == 201 || statusCode == 200) {
+                log("Container created successfully at: " + containerURL);
+            } else {
+                log("Failed to create container. HTTP status: " + statusCode);
+            }
+        } catch (Exception e) {
+            log("Error while creating container: " + e.getMessage());
+        }
     }
 
+
+
+    /*
+        Task 2.2 Adding data to an LDP container
+        Implement the method publishData() of the Java class Pod that enables agents to publish data (text/plain) to an LDP container in your pod.
+
+        TIP: Creating resources (e.g. publishing data to a container) based on the Solid Community Server documentation
+        TIP: use the provided method: createStringFromArray in Pod.
+     */
   /**
    * CArtAgO operation for publishing data within a .txt file in a Linked Data Platform container of the Solid pod
-   * 
+   *
    * @param containerName The name of the container where the .txt file resource will be created
    * @param fileName The name of the .txt file resource to be created in the container
    * @param data An array of Object data that will be stored in the .txt file
    */
     @OPERATION
     public void publishData(String containerName, String fileName, Object[] data) {
-        log("2. Implement the method publishData()");
+        // log("2. Implement the method publishData()");
+
+
+        try {
+            if (!containerName.endsWith("/")) {
+                containerName += "/";
+            }
+            if (!podURL.endsWith("/")) {
+                podURL += "/";
+            }
+
+            String resourceURL = podURL + containerName + fileName;
+
+            String content = createStringFromArray(data);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(resourceURL))
+                    .header("Content-Type", "text/plain")
+                    .PUT(HttpRequest.BodyPublishers.ofString(content))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            int statusCode = response.statusCode();
+            if (statusCode == 201 || statusCode == 200 || statusCode == 205) {
+                log("Data published successfully at: " + resourceURL);
+            } else {
+                log("Failed to publish data. HTTP status: " + statusCode);
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            log("Error while publishing data to container: " + e.getMessage());
+        }
     }
 
+
+    /*
+        Task 2.3. Reading data from an LDP container
+        Implement the method readData() of the Java class Pod that enables agents to read data (text/plain) from an LDP container in your pod.
+
+        TIP: Retrieving resources (e.g. reading data from a container) based on the Solid Community Server documentation
+        TIP: use the provided method: createArrayFromString in Pod.
+     */
   /**
    * CArtAgO operation for reading data of a .txt file in a Linked Data Platform container of the Solid pod
-   * 
+   *
    * @param containerName The name of the container where the .txt file resource is located
    * @param fileName The name of the .txt file resource that holds the data to be read
    * @param data An array whose elements are the data read from the .txt file
@@ -58,33 +174,49 @@ public class Pod extends Artifact {
 
   /**
    * Method for reading data of a .txt file in a Linked Data Platform container of the Solid pod
-   * 
+   *
    * @param containerName The name of the container where the .txt file resource is located
    * @param fileName The name of the .txt file resource that holds the data to be read
    * @return An array whose elements are the data read from the .txt file
    */
     public Object[] readData(String containerName, String fileName) {
-        log("3. Implement the method readData(). Currently, the method returns mock data");
+        try {
+            if (!containerName.endsWith("/")) {
+                containerName += "/";
+            }
 
-        // Remove the following mock responses once you have implemented the method
-        switch(fileName) {
-            case "watchlist.txt":
-                Object[] mockWatchlist = new Object[]{"The Matrix", "Inception", "Avengers: Endgame"};
-                return mockWatchlist;
-            case "sleep.txt":
-                Object[] mockSleepData = new Object[]{"6", "7", "5"};
-                return mockSleepData;
-            case "trail.txt":
-                Object[] mockTrailData = new Object[]{"3", "5.5", "5.5"};
-                return mockTrailData; 
-            default:
-                return new Object[0];
+            if (!podURL.endsWith("/")) {
+                podURL += "/";
+            }
+
+            String resourceURL = podURL + containerName + fileName;
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(resourceURL))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            int statusCode = response.statusCode();
+            if (statusCode == 200) {
+                String content = response.body(); // Get the body of the response
+                log("Data read successfully from: " + resourceURL);
+                log("Content: " + content);
+                return createArrayFromString(content);
+            } else {
+                log("Failed to read data. HTTP status: " + statusCode);
+            }
+        } catch (Exception e) {
+            log("Error while reading data from container: " + e.getMessage());
         }
 
+        return new Object[0];
     }
 
   /**
-   * Method that converts an array of Object instances to a string, 
+   * Method that converts an array of Object instances to a string,
    * e.g. the array ["one", 2, true] is converted to the string "one\n2\ntrue\n"
    *
    * @param array The array to be converted to a string
@@ -112,8 +244,8 @@ public class Pod extends Artifact {
 
   /**
    * CArtAgO operation for updating data of a .txt file in a Linked Data Platform container of the Solid pod
-   * The method reads the data currently stored in the .txt file and publishes in the file the old data along with new data 
-   * 
+   * The method reads the data currently stored in the .txt file and publishes in the file the old data along with new data
+   *
    * @param containerName The name of the container where the .txt file resource is located
    * @param fileName The name of the .txt file resource that holds the data to be updated
    * @param data An array whose elements are the new data to be added in the .txt file

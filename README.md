@@ -1,5 +1,10 @@
 # Exercise 4: Operating on Linked Data
 
+The documentation from Simon Dudler can be found here: [WAS_Simon_Dudler_Exercise4.md](docs/WAS_Simon_Dudler_Exercise4.md)
+
+---
+
+
 This repository contains a partial implementation of a [JaCaMo](https://jacamo-lang.github.io/) application, in which autonomous agents are able to operate on Linked Data in a distributed social network — and to manage personal data of a user.
 
 ## Table of Contents
